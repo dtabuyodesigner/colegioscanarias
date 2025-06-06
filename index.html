@@ -772,8 +772,6 @@
                 { "Codigo": "38017184", "Denominacion": "EEI VALLEHERMOSO", "Municipio": "VALLEHERMOSO", "Direccion": "AVDA. GUILLERMO ASCANIO MORENO S/N", "Telefono": "922-800587", "CorreoElectronico": "escueladeinfantilvallehermoso@gmail.com" },
                 { "Codigo": "38004931", "Denominacion": "RE SAN SEBASTIÁN DE LA GOMERA", "Municipio": "SAN SEBASTIÁN DE LA GOMERA", "Direccion": "AVDA. JOSÉ AGUIAR S/N", "Telefono": "922-871461 y 922-870915", "CorreoElectronico": "38004931@gobiernodecanarias.org" }
             ];
-            ];
-
             // --- ESTADO DE LA APLICACIÓN ---
             const [selectedIsland, setSelectedIsland] = React.useState("All");
             const [selectedZone, setSelectedZone] = React.useState("All");
@@ -878,7 +876,11 @@
                                             className="w-full flex justify-between items-center p-4 bg-gray-50 hover:bg-gray-100 focus:outline-none text-left">
                                             <div>
                                                 <h3 className="font-semibold text-lg text-indigo-800">{muni.municipality} <span className="text-sm font-normal text-gray-500">({muni.schools.length} {muni.schools.length === 1 ? 'centro' : 'centros'})</span></h3>
-                                                <span className="text-xs text-gray-500">{muni.distance.toFixed(2)} km al aeropuerto ({muni.airport})</span>
+                                                <div className="text-xs text-gray-600 mt-1 flex flex-wrap items-center gap-x-4 gap-y-1">
+                                                    <span><i className="fas fa-map-pin mr-1 text-gray-400"></i>Zona: <span className="font-semibold">{muni.zone}</span></span>
+                                                    <span><i className="fas fa-plane mr-1 text-gray-400"></i>Aeropuerto: <span className="font-semibold">{muni.airport}</span></span>
+                                                    <span><i className="fas fa-route mr-1 text-gray-400"></i>Distancia: <span className="font-semibold">{muni.distance.toFixed(2)} km</span></span>
+                                                </div>
                                             </div>
                                             <i className={`fas fa-chevron-down transition-transform duration-300 ${openMunicipality === muni.municipality ? 'rotate-180' : ''}`}></i>
                                         </button>
