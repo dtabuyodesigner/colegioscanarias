@@ -4,18 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Buscador Avanzado de Colegios de Canarias</title>
-    <!-- Tailwind CSS CDN -->
+    <!-- Tailwind CSS CDN para el diseño -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Inter -->
+    <!-- Google Fonts - Inter, para una tipografía limpia -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons -->
+    <!-- Font Awesome para los iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" xintegrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* Estilos base y personalizados */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f0f4f8;
+            background-color: #f0f4f8; /* Un fondo suave para la vista */
         }
-        .word-break-all { word-break: break-all; }
+        .word-break-all { 
+            word-break: break-all; /* Para que los correos largos no rompan el layout */
+        }
         /* Transiciones suaves para el acordeón */
         .accordion-content {
             max-height: 0;
@@ -27,10 +30,11 @@
         }
     </style>
 </head>
-<body>
+<body class="antialiased">
+    <!-- Contenedor principal donde se renderizará la aplicación React -->
     <div id="root"></div>
 
-    <!-- React y Babel -->
+    <!-- Scripts de React y Babel para la funcionalidad dinámica -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -38,7 +42,7 @@
     <script type="text/babel">
         // --- Componente principal de la aplicación React ---
         const App = () => {
-            // --- DATOS COMPLETOS ---
+            // --- DATOS COMPLETOS DE MUNICIPIOS Y COLEGIOS ---
             const baseMunicipalitiesData = [
                 // Tenerife
                 { island: "Tenerife", municipality: "San Cristóbal de La Laguna", zone: "Norte", airport: "TFN", distance: 4.08 },
@@ -138,7 +142,7 @@
             ];
 
             const allSchoolsData = [
-// GRAN CANARIA
+                // GRAN CANARIA
     { "Codigo": "35000045", "Denominacion": "CEIP ANA BETANCOR ESTUPIÑÁN", "Municipio": "AGAETE", "Direccion": "CAMINO LOS ROMEROS, 54", "Telefono": "928-306366", "CorreoElectronico": "35000045@gobiernodecanarias.org" },
     { "Codigo": "35000033", "Denominacion": "CEIP EL RISCO", "Municipio": "AGAETE", "Direccion": "EL RISCO, S/N", "Telefono": "928-455783", "CorreoElectronico": "35000033@gobiernodecanarias.org" },
     { "Codigo": "35000011", "Denominacion": "CEIP JOSÉ SÁNCHEZ Y SÁNCHEZ", "Municipio": "AGAETE", "Direccion": "C/ LAUREADO GENERAL SERRA ALGARRA, 14", "Telefono": "928-478864", "CorreoElectronico": "35000011@gobiernodecanarias.org" },
@@ -768,53 +772,68 @@
                 { "Codigo": "38017184", "Denominacion": "EEI VALLEHERMOSO", "Municipio": "VALLEHERMOSO", "Direccion": "AVDA. GUILLERMO ASCANIO MORENO S/N", "Telefono": "922-800587", "CorreoElectronico": "escueladeinfantilvallehermoso@gmail.com" },
                 { "Codigo": "38004931", "Denominacion": "RE SAN SEBASTIÁN DE LA GOMERA", "Municipio": "SAN SEBASTIÁN DE LA GOMERA", "Direccion": "AVDA. JOSÉ AGUIAR S/N", "Telefono": "922-871461 y 922-870915", "CorreoElectronico": "38004931@gobiernodecanarias.org" }
             ];
-
+            ];
 
             // --- ESTADO DE LA APLICACIÓN ---
             const [selectedIsland, setSelectedIsland] = React.useState("All");
             const [selectedZone, setSelectedZone] = React.useState("All");
             const [openMunicipality, setOpenMunicipality] = React.useState(null);
 
-            // --- LÓGICA DE PROCESAMIENTO ---
+            // --- LÓGICA DE PROCESAMIENTO Y FILTRADO ---
+            // useMemo optimiza el rendimiento, recalculando solo cuando cambian los filtros
             const processedData = React.useMemo(() => {
+                // Tipos de centros a mostrar (CEIP, EEI, etc.)
                 const schoolTypesToKeep = ['CEIP', 'EEI', 'CEPA', 'CEO', 'CEP', 'RE'];
+
+                // Filtra colegios que tienen una denominación y son de un tipo permitido
                 const filteredSchools = allSchoolsData.filter(school => {
                     if (!school.Denominacion) return false;
                     const schoolType = school.Denominacion.split(' ')[0];
                     return schoolTypesToKeep.includes(schoolType);
                 });
 
+                // Asocia cada colegio con su municipio
                 let municipalitiesWithSchools = baseMunicipalitiesData.map(muni => ({
                     ...muni,
-                    schools: filteredSchools.filter(school => school.Municipio && school.Municipio.toUpperCase().trim() === muni.municipality.toUpperCase().trim())
+                    schools: filteredSchools.filter(school => 
+                        school.Municipio && school.Municipio.toUpperCase().trim() === muni.municipality.toUpperCase().trim()
+                    )
                 }));
 
+                // Aplica filtro por isla si no es "All"
                 if (selectedIsland !== "All") {
                     municipalitiesWithSchools = municipalitiesWithSchools.filter(m => m.island === selectedIsland);
                 }
-
+                
+                // Aplica filtro por zona si no es "All"
                 if (selectedZone !== "All") {
                     municipalitiesWithSchools = municipalitiesWithSchools.filter(m => m.zone === selectedZone);
                 }
 
+                // Ordena los municipios por distancia al aeropuerto
                 municipalitiesWithSchools.sort((a, b) => a.distance - b.distance);
-
+                
+                // Devuelve solo los municipios que tienen colegios tras los filtros
                 return municipalitiesWithSchools.filter(m => m.schools.length > 0);
 
             }, [selectedIsland, selectedZone]);
             
+            // Genera la URL de Google Maps para una dirección
             const getMapUrl = (address, municipality, island) => {
                 const fullAddress = `${address}, ${municipality}, ${island}, España`;
                 return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
             };
             
+            // Función para abrir/cerrar el acordeón de un municipio
             const toggleAccordion = (municipalityName) => {
                 setOpenMunicipality(openMunicipality === municipalityName ? null : municipalityName);
             };
 
+            // Listas únicas de islas y zonas para los filtros
             const islands = ["All", ...new Set(baseMunicipalitiesData.map(item => item.island))].sort();
             const zones = ["All", "Norte", "Sur", "Este", "Oeste"];
 
+            // --- RENDERIZADO DEL COMPONENTE (JSX) ---
             return (
                 <div className="container mx-auto p-4 sm:p-6 lg:p-8">
                     <div className="bg-white shadow-xl rounded-lg p-6 md:p-8">
@@ -822,12 +841,15 @@
                             <h1 className="text-3xl md:text-4xl font-extrabold text-gray-800">Buscador de Colegios en Canarias</h1>
                             <p className="text-md text-gray-600 mt-2">Creado por <span className="font-semibold">Daniel Tabuyo de las Peñas</span></p>
                         </div>
+                        
                         <div className="bg-blue-50 border-l-4 border-blue-500 text-blue-800 p-4 mb-8 rounded-r-lg">
                             <h2 className="font-bold text-lg mb-2">Instrucciones</h2>
                             <p className="text-sm">
                                 Filtra por <span className="font-semibold">isla</span> y/o <span className="font-semibold">zona</span>. Los municipios se ordenan por cercanía a su aeropuerto. Haz clic en un municipio para desplegar sus colegios.
                             </p>
                         </div>
+
+                        {/* Controles de filtrado */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                             <div>
                                 <label htmlFor="islandFilter" className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Isla</label>
@@ -844,6 +866,8 @@
                                 </select>
                             </div>
                         </div>
+
+                        {/* Lista de resultados en formato acordeón */}
                         <div id="results-accordion" className="space-y-2">
                             {processedData.length === 0 ? (
                                 <p className="text-center text-gray-500 py-10">No se encontraron resultados con los filtros seleccionados.</p>
@@ -863,19 +887,21 @@
                                                 {muni.schools.map(school => (
                                                     <div key={school.Codigo} className="py-3">
                                                         <div className="flex justify-between items-start">
-                                                            <h4 className="font-semibold text-gray-800 pr-4">{school.Denominacion}</h4>
+                                                            <div className="pr-4">
+                                                                <h4 className="font-semibold text-gray-800">{school.Denominacion}</h4>
+                                                                <div className="text-sm text-gray-600 mt-1 space-y-1">
+                                                                    <p><span className="font-medium">Dirección:</span> {school.Direccion}</p>
+                                                                    <p><span className="font-medium">Teléfono:</span> {school.Telefono || 'No disponible'}</p>
+                                                                    <p className="word-break-all">
+                                                                        <span className="font-medium">Email: </span>
+                                                                        {school.CorreoElectronico ? <a href={`mailto:${school.CorreoElectronico}`} className="text-indigo-600 hover:underline">{school.CorreoElectronico}</a> : 'No disponible'}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
                                                             <a href={getMapUrl(school.Direccion, muni.municipality, muni.island)} target="_blank" rel="noopener noreferrer"
-                                                                className="ml-4 text-indigo-500 hover:text-indigo-700 flex-shrink-0" title="Ver en Google Maps">
+                                                                className="ml-4 text-indigo-500 hover:text-indigo-700 flex-shrink-0 pt-1" title="Ver en Google Maps">
                                                                 <i className="fas fa-map-location-dot fa-lg"></i>
                                                             </a>
-                                                        </div>
-                                                        <div className="text-sm text-gray-600 mt-1 space-y-1">
-                                                             <p><span className="font-medium">Dirección:</span> {school.Direccion}</p>
-                                                             <p><span className="font-medium">Teléfono:</span> {school.Telefono || 'No disponible'}</p>
-                                                             <p className="word-break-all">
-                                                                <span className="font-medium">Email: </span>
-                                                                {school.CorreoElectronico ? <a href={`mailto:${school.CorreoElectronico}`} className="text-indigo-600 hover:underline">{school.CorreoElectronico}</a> : 'No disponible'}
-                                                            </p>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -892,8 +918,10 @@
                 </div>
             );
         };
-
+        
+        // Monta la aplicación React en el div 'root'
         ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
+
